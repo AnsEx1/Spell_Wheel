@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "spell_wheel",
+  "version": "${version}",
+  "name": "Spell Wheel",
+  "description": "A configurable spell wheel (Radian) HUD, spell cycling and one-key casting for Spell Engine.",
+  "authors": [
+    "AnsEX"
+  ],
+  "contact": {
+    "homepage": "https://github.com/AnsEx1/Spell_Wheel",
+    "sources": "https://github.com/AnsEx1/Spell_Wheel",
+    "issues": "https://github.com/AnsEx1/Spell_Wheel/issues"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.ansex.spellwheel.SpellWheelMod"
+    ],
+    "client": [
+      "com.ansex.spellwheel.client.SpellWheelClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "fabric-api": "*",
+    "spell_engine": "*"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "key.categories.spell_wheel": "法术轮盘",
+  "key.spell_wheel.cycle": "循环切换当前法术",
+  "key.spell_wheel.cast": "施放当前选中法术",
+  "spell_wheel.hud.title": "法术轮盘"
+}
