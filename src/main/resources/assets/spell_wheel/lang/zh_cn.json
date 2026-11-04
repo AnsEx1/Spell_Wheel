@@ -2,5 +2,9 @@
   "key.categories.spell_wheel": "法术轮盘",
   "key.spell_wheel.cycle": "循环切换当前法术",
   "key.spell_wheel.cast": "施放当前选中法术",
-  "spell_wheel.hud.title": "法术轮盘"
+  "spell_wheel.hud.title": "法术轮盘",
+  "spell_wheel.hud.empty": "无法术",
+  "spell_wheel.cast.no_spell": "没有选中法术",
+  "spell_wheel.cast.not_on_hotbar": "热栏中没有该法术：%s",
+  "spell_wheel.cast.no_keybinding": "该法术没有可用键位：%s"
 }

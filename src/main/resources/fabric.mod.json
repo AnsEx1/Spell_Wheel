@@ -3,7 +3,7 @@
   "id": "spell_wheel",
   "version": "${version}",
   "name": "Spell Wheel",
-  "description": "A configurable spell wheel (Radian) HUD, spell cycling and one-key casting for Spell Engine.",
+  "description": "A configurable spell wheel HUD, spell cycling and one-key casting for Spell Engine.",
   "authors": [
     "AnsEX"
   ],
@@ -13,11 +13,8 @@
     "issues": "https://github.com/AnsEx1/Spell_Wheel/issues"
   },
   "license": "MIT",
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
-    "main": [
-      "com.ansex.spellwheel.SpellWheelMod"
-    ],
     "client": [
       "com.ansex.spellwheel.client.SpellWheelClient"
     ]

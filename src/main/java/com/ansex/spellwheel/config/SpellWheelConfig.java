@@ -25,17 +25,19 @@ public final class SpellWheelConfig {
     public boolean showBackground = true;
     public boolean showIcon = true;
     public boolean showName = true;
+    /** 冷却中在图标上绘制暗色遮罩。 */
+    public boolean showCooldown = true;
+    /** 施法时在 HUD 底部绘制进度条（前摇/引导）。 */
+    public boolean showCastProgress = true;
     public Anchor anchor = Anchor.BOTTOM_RIGHT;
     public int offsetX = 12;
     public int offsetY = 12;
     public double scale = 1.0;
     public String color = "#80FFFFFF";
 
-    // --- 调试与施法方式 ---
-    /** 是否输出调试日志。 */
+    // --- 调试 ---
+    /** 是否输出调试日志（默认关闭；开启后 info 级日志才会出现）。 */
     public boolean debug = false;
-    /** 施法方式：{@code hotbar}（无感驱动 Spell Engine 热栏键位）或 {@code network}（直接发 SpellRequest 包）。 */
-    public String castVia = "hotbar";
 
     // --- 运行时 ---
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -53,7 +55,7 @@ public final class SpellWheelConfig {
 
     /** 载入（不存在则写出默认值）。 */
     public static void load() {
-        path = FabricLoader.getInstance().getConfigDir().resolve(SpellWheelMod.MOD_ID + ".json");
+        path = configPath();
         if (Files.exists(path)) {
             try (var reader = Files.newBufferedReader(path)) {
                 SpellWheelConfig loaded = GSON.fromJson(reader, SpellWheelConfig.class);
@@ -72,7 +74,7 @@ public final class SpellWheelConfig {
     /** 写出当前配置。 */
     public static void save() {
         if (path == null) {
-            path = FabricLoader.getInstance().getConfigDir().resolve(SpellWheelMod.MOD_ID + ".json");
+            path = configPath();
         }
         try {
             Files.createDirectories(path.getParent());
@@ -84,19 +86,35 @@ public final class SpellWheelConfig {
         }
     }
 
+    private static Path configPath() {
+        return FabricLoader.getInstance().getConfigDir().resolve(SpellWheelMod.MOD_ID + ".json");
+    }
+
     /** 背景颜色解析为 ARGB（结果缓存；失败回退半透明白）。 */
     public int colorArgb() {
         if (cachedColor == Integer.MIN_VALUE) {
-            try {
-                cachedColor = (int) Long.parseLong(color.trim().replace("#", ""), 16);
-            } catch (Exception e) {
-                cachedColor = 0x80FFFFFF;
-            }
+            cachedColor = parseColor(color);
         }
         return cachedColor;
     }
 
-    public boolean isNetworkCast() {
-        return "network".equalsIgnoreCase(castVia);
+    private static int parseColor(String value) {
+        if (value == null) {
+            return 0x80FFFFFF;
+        }
+        try {
+            String trimmed = value.trim();
+            if (trimmed.startsWith("#")) {
+                trimmed = trimmed.substring(1);
+            }
+            long parsed = Long.parseLong(trimmed, 16);
+            // 允许 #RRGGBB（补全不透明 alpha）与 #AARRGGBB
+            if (trimmed.length() <= 6) {
+                parsed |= 0xFF000000L;
+            }
+            return (int) parsed;
+        } catch (Exception e) {
+            return 0x80FFFFFF;
+        }
     }
 }

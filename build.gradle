@@ -38,6 +38,33 @@ dependencies {
 
     // 本地 jar 兜底：把任意依赖 jar 放进 libs/ 即可（无需网络时用）
     modImplementation fileTree(dir: 'libs', include: '*.jar')
+
+    // 单元测试（纯 JVM，不启动游戏）
+    // 通过 -PwithTests 启用：需要从 Maven Central 解析 JUnit（离线环境默认关闭）
+    if (project.hasProperty('withTests')) {
+        testImplementation platform('org.junit:junit-bom:5.10.2')
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+}
+
+// 未启用测试依赖时，连测试源码一起排除，避免离线构建因缺少 JUnit 而失败
+sourceSets {
+    test {
+        java {
+            if (!project.hasProperty('withTests')) {
+                setSrcDirs([])
+            }
+        }
+    }
+}
+
+tasks.named('test') {
+    enabled = project.hasProperty('withTests')
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+    }
 }
 
 processResources {

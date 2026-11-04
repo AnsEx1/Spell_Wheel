@@ -1,6 +1,7 @@
 package com.ansex.spellwheel.client;
 
 import com.ansex.spellwheel.SpellWheelMod;
+import com.ansex.spellwheel.config.SpellWheelConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -11,6 +12,8 @@ public class SpellWheelClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        SpellWheelConfig.load();
+
         KeyBindingHelper.registerKeyBinding(KeyBindings.CYCLE);
         KeyBindingHelper.registerKeyBinding(KeyBindings.CAST);
 

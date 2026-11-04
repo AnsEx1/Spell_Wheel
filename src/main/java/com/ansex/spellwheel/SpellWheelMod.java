@@ -1,6 +1,5 @@
 package com.ansex.spellwheel;
 
-import com.ansex.spellwheel.config.SpellWheelConfig;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,7 @@ public class SpellWheelMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        SpellWheelConfig.load();
+        // 本模组为纯客户端功能（environment = client），配置由客户端初始化时载入。
         LOGGER.info("[{}] initialized", MOD_ID);
     }
 }

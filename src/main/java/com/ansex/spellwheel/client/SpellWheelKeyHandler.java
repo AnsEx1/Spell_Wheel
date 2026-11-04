@@ -6,13 +6,14 @@ import com.ansex.spellwheel.core.SpellEngineBridge;
 import com.ansex.spellwheel.core.SpellSelectionState;
 import com.ansex.spellwheel.core.SpellWheelSpell;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
 
 /**
  * 按键处理（每客户端 tick 调用一次）。
  * <ul>
- *   <li>刷新法术列表缓存。</li>
+ *   <li>刷新法术列表缓存（事件驱动）。</li>
  *   <li>切换键：按下推进选中下标。</li>
- *   <li>施法键：按下开始施法、松开结束（方式由配置 {@code castVia} 决定）。</li>
+ *   <li>施法键：按下开始施法、松开结束。</li>
  * </ul>
  */
 public final class SpellWheelKeyHandler {
@@ -28,6 +29,9 @@ public final class SpellWheelKeyHandler {
     /** 由 {@code ClientTickEvents.END_CLIENT_TICK} 调用。 */
     public static void onClientTick(MinecraftClient client) {
         if (client.player == null) {
+            // 离开世界时复位，避免状态泄漏到下一次进入
+            castKeyDown = false;
+            SpellSelectionState.get().tick(null);
             return;
         }
         SpellSelectionState selection = SpellSelectionState.get();
@@ -37,7 +41,12 @@ public final class SpellWheelKeyHandler {
         if (KeyBindings.CYCLE.wasPressed()) {
             selection.refresh(client.player);
             SpellWheelSpell next = selection.cycle();
-            SpellWheelMod.LOGGER.info("[{}] 切换按键: 可用法术={} 选中={}",
+            if (next == null) {
+                notifyPlayer(client, Text.translatable("spell_wheel.hud.empty"));
+            } else {
+                notifyPlayer(client, next.displayName());
+            }
+            SpellWheelMod.LOGGER.debug("[{}] 切换按键: 可用法术={} 选中={}",
                     SpellWheelMod.MOD_ID, selection.available().size(), next == null ? "<none>" : next.id());
         }
 
@@ -53,7 +62,7 @@ public final class SpellWheelKeyHandler {
             long now = client.player.age;
             if (now < lastProgressLogTick || now - lastProgressLogTick >= PROGRESS_LOG_INTERVAL) {
                 lastProgressLogTick = now;
-                SpellWheelMod.LOGGER.info("[{}][debug] 施法进度: {}",
+                SpellWheelMod.LOGGER.debug("[{}] 施法进度: {}",
                         SpellWheelMod.MOD_ID, SpellEngineBridge.castProgress(client.player));
             }
         }
@@ -62,34 +71,46 @@ public final class SpellWheelKeyHandler {
     private static void castStart(MinecraftClient client, SpellSelectionState selection, boolean debug) {
         SpellWheelSpell current = selection.current();
         if (current == null) {
-            SpellWheelMod.LOGGER.info("[{}] 施法按键: 当前没有选中法术（未持有施法物品？）", SpellWheelMod.MOD_ID);
+            notifyPlayer(client, Text.translatable("spell_wheel.hud.empty"));
             return;
         }
-        SpellWheelConfig config = SpellWheelConfig.get();
-        SpellWheelMod.LOGGER.info("[{}] 施法按键按下: {} (方式={})",
-                SpellWheelMod.MOD_ID, current.id(), config.castVia);
         if (debug) {
-            SpellWheelMod.LOGGER.info("[{}][debug] 法术信息: {}",
+            SpellWheelMod.LOGGER.debug("[{}] 施法按键按下: {}", SpellWheelMod.MOD_ID, current.id());
+            SpellWheelMod.LOGGER.debug("[{}] 法术信息: {}",
                     SpellWheelMod.MOD_ID, SpellEngineBridge.describeSpell(current.id()));
         }
 
-        if (config.isNetworkCast()) {
-            SpellEngineBridge.castViaNetwork(client.player, current.id());
-        } else {
-            SpellEngineHotbar.press(current.id());
+        SpellEngineHotbar.Result result = SpellEngineHotbar.press(current.id());
+        if (result != SpellEngineHotbar.Result.OK) {
+            notifyPlayer(client, Text.translatable(failureKey(result), current.displayName()));
+            return;
         }
 
         if (debug) {
-            SpellWheelMod.LOGGER.info("[{}][debug] 施法后: isCasting={}, progress={}",
+            SpellWheelMod.LOGGER.debug("[{}] 施法后: isCasting={}, progress={}",
                     SpellWheelMod.MOD_ID,
                     SpellEngineBridge.isCasting(client.player),
                     SpellEngineBridge.castProgress(client.player));
         }
     }
 
+    private static String failureKey(SpellEngineHotbar.Result result) {
+        return switch (result) {
+            case NO_SPELL -> "spell_wheel.cast.no_spell";
+            case NOT_ON_HOTBAR -> "spell_wheel.cast.not_on_hotbar";
+            case NO_KEYBINDING -> "spell_wheel.cast.no_keybinding";
+            case OK -> "spell_wheel.cast.ok";
+        };
+    }
+
     private static void castEnd() {
-        if (!SpellWheelConfig.get().isNetworkCast()) {
-            SpellEngineHotbar.release();
+        SpellEngineHotbar.release();
+    }
+
+    /** 在 actionbar 提示玩家（不刷聊天栏）。 */
+    private static void notifyPlayer(MinecraftClient client, Text message) {
+        if (client.player != null && message != null) {
+            client.player.sendMessage(message, true);
         }
     }
 }
