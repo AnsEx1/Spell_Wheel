@@ -5,6 +5,8 @@
 - **Minecraft 1.20.1 · Fabric**
 - 作者：**AnsEX**
 - 仓库：<https://github.com/AnsEx1/Spell_Wheel>
+- 开发历程：[DEVELOPMENT_HISTORY.md](DEVELOPMENT_HISTORY.md)
+- 许可证：[LICENSE.txt](LICENSE.txt)
 
 ## 功能
 
