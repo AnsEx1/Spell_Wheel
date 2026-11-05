@@ -3,7 +3,7 @@
 为 **Spell Engine** 添加一个**法术轮盘**功能：循环切换当前法术、一键施法、以及一个位置可配置的 HUD。
 
 - **Minecraft 1.20.1 · Fabric**
-- 作者：**AnsEX**
+- 作者：**AnsEX**、**deepseek**
 - 仓库：<https://github.com/AnsEx1/Spell_Wheel>
 - 开发历程：[DEVELOPMENT_HISTORY.md](DEVELOPMENT_HISTORY.md)
 - 许可证：[LICENSE.txt](LICENSE.txt)
